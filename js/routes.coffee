@@ -1,11 +1,5 @@
 angular.module 'app.routes', ['ui.router']
-.controller "StartCtrl", [
-  '$scope', 'ModalSrv', ($scope, ModalSrv)->
-    console.log 'StartCtrl initialized'
-    $scope.title = 'issa'
 
-
-]
 .config [
   '$stateProvider', '$urlRouterProvider'
   ($stateProvider, $urlRouterProvider)->
@@ -20,7 +14,6 @@ angular.module 'app.routes', ['ui.router']
       .state 'state1',
         url: "/state1"
         templateUrl: "templates/state1.html"
-        controller: 'StartCtrl as ctrl'
 
       .state 'state1.list',
           url: '/list'
