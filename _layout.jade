@@ -17,7 +17,7 @@ html(ng-app="app" lang="en")
     |   <script type="text/javascript" src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     | <![endif]-->
     title Freelancer - Start Bootstrap Theme
-  body(ng-controller="AppCtrl as vm" id="page-top" class="index" ng-class="{'modal-open': vm.modal.active}")
+  body#page-top.index(ng-controller="AppCtrl as vm" ng-class="{'modal-open': vm.modal.active}")
     != yield
 
     //- libs

@@ -1,20 +1,20 @@
 
 //- Navigation
-nav(class="navbar navbar-default navbar-fixed-top")
-  div(class="container")
+nav.navbar(class="navbar-default navbar-fixed-top")
+  .container
     //- Brand and toggle get grouped for better mobile display
-    div(class="navbar-header page-scroll")
-      button(type="button" class="navbar-toggle" ng-click="vm.menu.toggle()")
-        span(class="sr-only") Toggle navigation
-        span(class="icon-bar")
-        span(class="icon-bar")
-        span(class="icon-bar")
-      a(class="navbar-brand" href="#" ng-click="vm.scrollTop()") U2W
+    .navbar-header(class="page-scroll")
+      button.navbar-toggle(type="button" ng-click="vm.menu.toggle()")
+        span.sr-only Toggle navigation
+        span.icon-bar
+        span.icon-bar
+        span.icon-bar
+      a.navbar-brand(href="#" ng-click="vm.scrollTop()") U2W
 
     //- Collect the nav links, forms, and other content for toggling
-    div(collapse="vm.menu.collapse" class="navbar-collapse")
-      ul(class="nav navbar-nav navbar-right")
-        li(class="hidden")
+    .navbar-collapse(collapse="vm.menu.collapse")
+      ul.nav(class="navbar-nav navbar-right")
+        li.hidden
 
         li(ng-if="vm.credenciais.me" du-scrollspy="team")
           a(href="#team" du-smooth-scroll ng-click="vm.menu.close()") Tools
@@ -28,51 +28,51 @@ nav(class="navbar navbar-default navbar-fixed-top")
         li
           a(ng-show="vm.credenciais.me" ng-click="vm.credenciais.logout()" href="#") Sair
           a(ng-hide="vm.credenciais.me" target="_self" href="/auth/facebook")
-            i(class="fa fa-fw fa-facebook-square")
+            i.fa(class="fa-fw fa-facebook-square")
             |  Entrar
 
 //- Header
 header
-  div(class="container")
-    div(class="row")
-      div(class="col-lg-12")
-        img(class="img-responsive" width="200" height="200" src="img/logo.png" alt="")
-        div(class="intro-text")
-          span(class="name") United To Win
-          span(class="skills") Matar, roubar e destruir
+  .container
+    .row
+      .col-lg-12
+        img.img-responsive( width="200" height="200" src="img/logo.png" alt="")
+        .intro-text
+          span.name United To Win
+          span.skills Matar, roubar e destruir
 
 //- Portfolio Grid Section
-section(id="team" ng-include="'views/main/member-content.html'" ng-if="vm.credenciais.me")
+section#team(ng-include="'views/main/member-content.html'" ng-if="vm.credenciais.me")
 
 //- About Section -->
-section(class="success" id="about")
-  div(class="container")
-    div(class="row")
-      div(class="col-lg-12 text-center")
+section#about.success
+  .container
+    .row
+      .col-lg-12(class="text-center")
         h2 About
-        hr(class="star-light")
-    div(class="row")
-      div(class="col-lg-4 col-lg-offset-2")
+        hr.star-light
+    .row
+      .col-lg-4(class="col-lg-offset-2")
         p Freelancer is a free bootstrap theme created by Start Bootstrap. The download includes the complete source files including HTML, CSS, and JavaScript as well as optional LESS stylesheets for easy customization.
-      div(class="col-lg-4")
+      .col-lg-4
         p Whether you're a student looking to showcase your work, a professional looking to attract clients, or a graphic artist looking to share your projects, this template is the perfect starting point!
-      div(class="col-lg-8 col-lg-offset-2 text-center")
-        a(href="#" class="btn btn-lg btn-outline")
-          i(class="fa fa-download")
+      .col-lg-8(class="col-lg-offset-2 text-center")
+        a.btn(href="#" class="btn-lg btn-outline")
+          i.fa(class="fa-download")
           |  Download Theme
 
 //- Footer
-footer(class="text-center")
-  div(class="footer-above")
-    div(class="container")
-      div(class="row")
-        div(class="footer-col col-sm-4")
+footer.text-center
+  .footer-above
+    .container
+      .row
+        .footer-col(class="col-sm-4")
           h3 Sobre U2W
           p United to Win, é um clan de <a target="_blank" href="http://clashofclans.com/">Clash of Clans</a> formado por amigos que adoram saquear as vilas alheias e guerrear 3 vezes por semana.
 
-        div(class="footer-col col-sm-4")
+        .footer-col(class="col-sm-4")
 
-        div(class="footer-col col-sm-4")
+        .footer-col(class="col-sm-4")
           h3 Bouledogue
           p
             | Desenvolvimento de Sites, Apps e Sistemas
@@ -81,27 +81,26 @@ footer(class="text-center")
 
 
 
-  div(class="footer-below")
-    div(class="container")
-      div(class="row")
-        div(class="col-lg-12")
-          | Copyright &copy; U2W 2014
+  .footer-below
+    .container
+      .row
+        .col-lg-12 Copyright &copy; U2W 2014
 
 //- Scroll to Top Button (Only visible on small and extra-small screen sizes)
-div(class="scroll-top visible-xs visble-sm" ng-click="vm.scrollTop()")
-  a(href="#" class="btn-social btn-outline")
-    i(class="fa fa-chevron-up")
+.scroll-top(class="visible-xs visble-sm" ng-click="vm.scrollTop()")
+  a.btn-social(href="#" class="btn-outline")
+    i.fa(class="fa-chevron-up")
 
 //- Modal
-div(class="portfolio-modal modal" ng-class="{'show-modal': vm.modal.active}")
-  div(class="modal-content")
-    div(class="close-modal" ui-sref="home")
-      div(class="lr")
-        div(class="rl")
-    div(class="container")
-      div(class="row")
-        div(class="col-lg-8 col-lg-offset-2")
-          div(class="modal-body")
+.modal(class="portfolio-modal" ng-class="{'show-modal': vm.modal.active}")
+  .modal-content
+    .close-modal(ui-sref="home")
+      .lr
+        .rl
+    .container
+      .row
+        .col-lg-8(class="col-lg-offset-2")
+          .modal-body
             a(ui-sref="state1") State 1
             a(ui-sref="state2") State 2
             div(ui-view="")
