@@ -16,18 +16,15 @@ nav.navbar(class="navbar-default navbar-fixed-top")
       ul.nav(class="navbar-nav navbar-right")
         li.hidden
 
-        li(ng-if="vm.credenciais.me" du-scrollspy="team")
-          a(href="#team" du-smooth-scroll ng-click="vm.menu.close()") Tools
+        li.ng-cloak(ng-show="vm.loginSrv.session" du-scrollspy="options" ng-cloak="")
+          a(href="#options" du-smooth-scroll ng-click="vm.menu.close()") Opções
 
         li(du-scrollspy="about")
           a(href="#about" du-smooth-scroll ng-click="vm.menu.close()") Sobre
 
         li
-          a(ui-sref="state1" ng-click="vm.menu.close()") State 1
-
-        li
-          a(ng-show="vm.credenciais.me" ng-click="vm.credenciais.logout()" href="#") Sair
-          a(ng-hide="vm.credenciais.me" target="_self" href="/auth/facebook")
+          a.ng-cloak(ng-show="vm.loginSrv.me" ng-click="vm.loginSrv.logout()" ng-cloak="") Sair
+          a(ng-hide="vm.loginSrv.me" ng-click="vm.loginSrv.login()")
             i.fa(class="fa-fw fa-facebook-square")
             |  Entrar
 
@@ -36,13 +33,13 @@ header
   .container
     .row
       .col-lg-12
-        img.img-responsive( width="200" height="200" src="img/logo.png" alt="")
+        img.img-responsive(width="200" height="200" src="img/logo.png")
         .intro-text
           span.name United To Win
           span.skills Matar, roubar e destruir
 
-//- Portfolio Grid Section
-section#team(ng-include="'views/main/member-content.html'" ng-if="vm.credenciais.me")
+//- Options Grid Section
+section#options.ng-cloak(ng-include="'./templates/options.html'" ng-if="vm.loginSrv.me" ng-cloak="")
 
 //- About Section -->
 section#about.success
@@ -79,8 +76,6 @@ footer.text-center
             a(target="_blank" href="http://www.bouledogue.me/")
              |  venha nos conhecer
 
-
-
   .footer-below
     .container
       .row
@@ -95,12 +90,9 @@ footer.text-center
 .modal(class="portfolio-modal" ng-class="{'show-modal': vm.modal.active}")
   .modal-content
     .close-modal(ui-sref="home")
-      .lr
-        .rl
+      i.fa(class="fa-times")
     .container
       .row
         .col-lg-8(class="col-lg-offset-2")
           .modal-body
-            a(ui-sref="state1") State 1
-            a(ui-sref="state2") State 2
             div(ui-view="")

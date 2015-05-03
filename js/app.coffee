@@ -1,10 +1,6 @@
-angular.module 'app', ['ui.router','app.routes', 'duScroll', 'ui.bootstrap', 'ngAnimate']
+angular.module 'app', ['ui.router','app.routes', 'duScroll', 'ui.bootstrap', 'ngAnimate', 'firebase']
 
-.config [
-  '$locationProvider'
-  ($locationProvider)->
-    $locationProvider.html5Mode true
-]
+.constant 'FIREBASE_URL', 'https://united2win.firebaseio.com/'
 
 .run [
   "$rootScope", "ModalSrv"
@@ -14,11 +10,12 @@ angular.module 'app', ['ui.router','app.routes', 'duScroll', 'ui.bootstrap', 'ng
 ]
 
 .controller "AppCtrl", [
-  "Menu", "ModalSrv", "$document"
-  (Menu, ModalSrv, $document)->
+  "Menu", "ModalSrv", "$document", 'loginSrv'
+  (Menu, ModalSrv, $document, loginSrv)->
     vm = @
     vm.menu = Menu
     vm.modal = ModalSrv
+    vm.loginSrv = loginSrv
     vm.scrollTop = ->
       $document.scrollTopAnimated(0, 500)
 
@@ -27,17 +24,82 @@ angular.module 'app', ['ui.router','app.routes', 'duScroll', 'ui.bootstrap', 'ng
 
 .factory "toggler", ->
     class
-      constructor: (@attrName)->
-        @[@attrName] = true
+      constructor: (attrs, @onOpen=angular.noop, @onClose=angular.noop)->
+        angular.extend @, attrs
+        @attrName = 'open' unless 'attrName' of attrs
+        @[@attrName] = true unless @attrName of attrs
       toggle: ->
         if @[@attrName] then @open() else @close()
       close: ->
         @[@attrName] = true
+        @onClose(arguments...)
       open: ->
         @[@attrName] = false
+        @onOpen(arguments...)
 
-.factory "ModalSrv", [ 'toggler', (tg)-> new tg('active') ]
-.factory "Menu",     [ 'toggler', (tg)-> new tg('collapse') ]
+.factory "ModalSrv", [ 'toggler', (tg)-> new tg(attrName: 'active') ]
+
+.factory "Menu",     [ 'toggler', (tg)-> new tg(attrName: 'collapse') ]
+
+.factory "socialExtractor", ->
+    extractors =
+      facebook: (data)->
+        obj = {}
+        obj.provider          = data.provider
+        obj.name              = data.facebook.displayName
+        obj.email             = data.facebook.email if data.facebook.email
+
+        if profile = data.facebook.cachedUserProfile
+          obj.gender       = profile.gender
+          obj.locale       = profile.locale
+          obj.profile_url  = profile.link
+          obj.picture_url  = profile.picture.data.url if profile.picture?.data?.url?
+
+        obj
+
+    (data)-> extractors[data.provider](data)
+
+.factory "loginSrv", [
+  'FIREBASE_URL', '$firebaseAuth', '$firebaseObject', 'socialExtractor'
+  (firebase_url, $firebaseAuth, $firebaseObject, socialExtractor)->
+    ref = new Firebase firebase_url
+
+    service =
+      auth: $firebaseAuth(ref)
+
+      logout: ->
+        @me.$destroy()
+        @me = undefined
+        @auth.$unauth()
+
+      login: (provider='facebook')->
+        @auth.$authWithOAuthPopup provider
+
+      loadMe: (data)->
+        $firebaseObject(ref.child("users/#{data.uid}")).$loaded()
+          .then (user)=>
+            @me = user
+            @me.$watch => @logout() unless @me.role
+
+            unless @me.role
+              angular.extend @me, socialExtractor(data)
+              @me.role = 'guest'
+              @me.admin = false
+              @me.$save().then =>
+                ref.child("guests/#{@me.$id}").set({banned:false, name: @me.name})
+
+    service.auth.$onAuth (authData)->
+      if authData
+        service.session = authData
+        service.loadMe(authData)
+      else
+        service.session = undefined
+
+    service
+]
+
+.filter "firstName", ->
+  (fullName)-> fullName.split(" ")[0]
 
 
 .directive "navbarFixedTop", ["$timeout", ($timeout)->
@@ -68,10 +130,86 @@ angular.module 'app', ['ui.router','app.routes', 'duScroll', 'ui.bootstrap', 'ng
       window.removeEventListener 'scroll', scrollFn
 ]
 
+.controller "MembersCtrl", [
+  ->
+    ctrl = @
+    ctrl.members = [
+      {nick: 'huggaf',          name: 'Pablo',  role: 'Co-leader'}
+      {nick: 'victor marques',  name: 'Victor', role: 'Leader'}
+      {nick: 'robersaum',       name: 'Rober',  role: 'Co-leader'}
+    ]
 
+    return
+]
 
+.controller "GuestsCtrl", [
+  'FIREBASE_URL', '$firebaseArray', 'toggler', '$state', '$firebaseObject'
+  (firebase_url, $firebaseArray, toggler, $state, $firebaseObject)->
+    ctrl = @
+    ctrl.loading = true
+    ref = new Firebase firebase_url
 
+    $firebaseArray(ref.child('guests')).$loaded()
+      .then (guests)->
+        ctrl.loading = false
+        ctrl.guests = guests
+        ctrl.banned.check()
 
+        ctrl.guests.$watch ->
+          ctrl.banned.check()
+
+      .catch (err)->
+        ctrl.loading = false
+        if err.code == 'PERMISSION_DENIED'
+          ctrl.erro = "Desculpe, mas você não tem permissão para acessar esta lista"
+        else
+          $state.go 'home'
+
+    ctrl.banned = new toggler
+      attrName: 'visible'
+      class: 'fa-eye-slash'
+      visible: false
+      exists: false
+      check: ->
+        @exists = (ctrl.guests.filter((e)-> JSON.parse(e.banned)).length > 0)
+      -> @class = 'fa-eye-slash'
+      -> @class = 'fa-eye'
+
+    ctrl.ban = (guest)->
+      guest.banned = true
+      ctrl.banned.check()
+      ctrl.guests.$save(guest)
+
+    ctrl.unban = (guest)->
+      guest.banned = false
+      ctrl.banned.check()
+      ctrl.guests.$save(guest)
+
+    ctrl.accept = (guest)->
+      memory =
+        uid: guest.$id
+        name: guest.name
+        banned: guest.banned
+
+      ctrl.guests.$remove(guest).then ->
+        ref.child("guests/#{memory.uid}").remove (err)->
+          unless err?
+            ref.child("members/#{memory.uid}").set
+              since: Firebase.ServerValue.TIMESTAMP
+              (err)->
+                unless err?
+                  ref.child("users/#{memory.uid}/role").set("member")
+                else
+                  console.log 'Member was not created', err
+                  # rollback recreate guest
+                  ref.child("guests/#{memory.uid}").set
+                    name: memory.name
+                    banned: memory.banned
+          else
+            console.log 'Guest was not destroyed', err
+
+    return
+]
 
 
 

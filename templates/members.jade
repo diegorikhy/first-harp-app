@@ -1,0 +1,10 @@
+div(class="container-fluid")
+  div(class="row")
+    h2 Membros
+    hr(class="star-primary")
+    table(class="table text-left")
+      tbody
+        tr(class="text-large" ng-repeat="member in ctrl.members")
+          td <strong>{{member.nick}}</strong>
+          td(class="hidden-xs") {{member.name}}
+          td {{member.role}}

@@ -12,24 +12,29 @@ html(ng-app="app" lang="en")
     link(rel="stylesheet" href="/fonts/font-awesome/css/font-awesome.min.css" type="text/css")
     link(rel="stylesheet" href="http://fonts.googleapis.com/css?family=Montserrat:400,700" type="text/css")
     link(rel="stylesheet" href="http://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" type="text/css")
+    link(rel="stylesheet" href="/css/main.css")
     | <!--[if lt IE 9]>
     |   <script type="text/javascript" src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
     |   <script type="text/javascript" src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     | <![endif]-->
-    title Freelancer - Start Bootstrap Theme
+    title United to Win - Best Clan of Clash of Clans
   body#page-top.index(ng-controller="AppCtrl as vm" ng-class="{'modal-open': vm.modal.active}")
     != yield
 
     //- libs
-    script(type='text/javascript' src="/js/lib/jquery.js")
-    script(type='text/javascript' src="/js/lib/angular.min.js")
-    script(type='text/javascript' src="/js/lib/angular-animate.min.js")
-    script(type='text/javascript' src="/js/lib/angular-touch.min.js")
-    script(type='text/javascript' src="/js/lib/angular-ui-router.min.js")
-    script(type='text/javascript' src="/js/lib/bootstrap.min.js")
-    script(type='text/javascript' src="/js/lib/du-scroll.min.js")
-    script(type='text/javascript' src="/js/lib/ui-bootstrap-tpls-0.12.1.min.js")
+    script(type="text/javascript" src="/js/lib/jquery.js")
+    script(type="text/javascript" src="/js/lib/angular.min.js")
+    script(type="text/javascript" src="/js/lib/angular-animate.min.js")
+    script(type="text/javascript" src="/js/lib/angular-touch.min.js")
+    script(type="text/javascript" src="/js/lib/angular-ui-router.min.js")
+    script(type="text/javascript" src="/js/lib/bootstrap.min.js")
+    script(type="text/javascript" src="/js/lib/du-scroll.min.js")
+    script(type="text/javascript" src="/js/lib/ui-bootstrap-tpls-0.12.1.min.js")
+
+    //- external libs
+    script(type="text/javascript" src="https://cdn.firebase.com/js/client/2.2.2/firebase.js")
+    script(type="text/javascript" src="https://cdn.firebase.com/libs/angularfire/1.0.0/angularfire.min.js")
 
     //- scripts
-    script(type='text/javascript' src="/js/app.js")
-    script(type='text/javascript' src="/js/routes.js")
+    script(type="text/javascript" src="/js/app.js")
+    script(type="text/javascript" src="/js/routes.js")

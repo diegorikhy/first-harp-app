@@ -1,0 +1,34 @@
+.guests-page(class="container-fluid")
+  div(ng-if="ctrl.loading")
+    i.fa(class="fa-circle-o-notch fa-spin")
+    |  Carregando a Visitantes...
+
+  .row(ng-hide="ctrl.loading" )
+    h2 Visitantes
+    hr.star-primary
+
+    div.erro(ng-if="ctrl.erro")
+      {{ctrl.erro}}
+
+    table.table(class="text-left")
+      tbody
+        tr.text-large(ng-repeat="guest in ctrl.guests | filter: {banned: false}")
+          td.actions
+            i.fa(class="fa-check-circle-o" ng-click="ctrl.accept(guest)" title="Aceitar")
+            i.fa(class="fa-ban"            ng-click="ctrl.ban(guest)"    title="Banir")
+          td.hidden-xs {{guest.name}}
+          td.visible-xs {{guest.name | firstName}}
+
+    div#banneds(ng-if="ctrl.banned.exists")
+      i.fa( class="{{ctrl.banned.class}} {{!ctrl.banned.visible && 'banned'}}"
+            title="{{ctrl.banned.visible && 'mostrando' || 'escondendo'}} banidos"
+            ng-click="ctrl.banned.toggle()")
+
+      div(ng-if="ctrl.banned.visible")
+        table.banned(class="table text-left")
+          tbody
+            tr.text-large(ng-repeat="banned in ctrl.guests | filter: {banned: true}")
+              td.actions
+                i.fa(class="fa-arrow-up" ng-click="ctrl.unban(banned)" title="Desbanir")
+              td.hidden-xs {{banned.name}}
+              td.visible-xs {{banned.name | firstName}}

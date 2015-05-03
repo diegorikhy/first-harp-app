@@ -1,24 +1,15 @@
-body{
-  font-family: "Helvetica";
-  text-align: center;
-  padding: 50px 20px 0;
-  background: #f4f4f7;
-  color: #444;
-  margin: 0;
+*[ng-click]{
+  cursor: pointer;
 }
 
-h1{
-  font-size: 65px;
-  line-height: 1.2em;
-  border-bottom: #CCC solid 1px;
-  padding: 20px 0;
+div.guests-page{
+  td.actions {
+    width: 3em;
+    & > i.fa { margin-right: .3em; }
+  }
+
+  .banned{
+    color: #999;
+  }
 }
 
-h3{
-  font-weight: 300;
-}
-
-a{
-  margin: .3em 1em;
-  display:inline-block;
-}
