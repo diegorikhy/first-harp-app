@@ -37,7 +37,13 @@ angular.module 'app', ['ui.router','app.routes', 'duScroll', 'ui.bootstrap', 'ng
         @[@attrName] = false
         @onOpen(arguments...)
 
-.factory "ModalSrv", [ 'toggler', (tg)-> new tg(attrName: 'active') ]
+.factory "ModalSrv", [
+  'toggler',
+  (tg)->
+    new tg
+      attrName: 'active'
+      goBackTo: undefined
+]
 
 .factory "Menu",     [ 'toggler', (tg)-> new tg(attrName: 'collapse') ]
 
@@ -60,10 +66,8 @@ angular.module 'app', ['ui.router','app.routes', 'duScroll', 'ui.bootstrap', 'ng
     (data)-> extractors[data.provider](data)
 
 .factory "loginSrv", [
-  'FIREBASE_URL', '$firebaseAuth', '$firebaseObject', 'socialExtractor'
-  (firebase_url, $firebaseAuth, $firebaseObject, socialExtractor)->
-    ref = new Firebase firebase_url
-
+  'fbRef', '$firebaseAuth', '$firebaseObject', 'socialExtractor'
+  (ref, $firebaseAuth, $firebaseObject, socialExtractor)->
     service =
       auth: $firebaseAuth(ref)
 
@@ -131,23 +135,34 @@ angular.module 'app', ['ui.router','app.routes', 'duScroll', 'ui.bootstrap', 'ng
 ]
 
 .controller "MembersCtrl", [
-  ->
+  'fbRef', '$firebaseArray', '$state', 'ModalSrv',
+  (ref, $firebaseArray, $state, ModalSrv)->
+    ModalSrv.goBackTo = undefined
+
     ctrl = @
-    ctrl.members = [
-      {nick: 'huggaf',          name: 'Pablo',  role: 'Co-leader'}
-      {nick: 'victor marques',  name: 'Victor', role: 'Leader'}
-      {nick: 'robersaum',       name: 'Rober',  role: 'Co-leader'}
-    ]
+    ctrl.loading = true
+
+    $firebaseArray(ref.child('members')).$loaded()
+      .then (members)->
+        ctrl.loading = false
+        ctrl.members = members
+
+      .catch (err)->
+        ctrl.loading = false
+        if err.code == 'PERMISSION_DENIED'
+          ctrl.erro = "Desculpe, mas você não tem permissão para acessar esta lista"
+        else
+          $state.go 'home'
 
     return
 ]
 
 .controller "GuestsCtrl", [
-  'FIREBASE_URL', '$firebaseArray', 'toggler', '$state', '$firebaseObject'
-  (firebase_url, $firebaseArray, toggler, $state, $firebaseObject)->
+  'fbRef', '$firebaseArray', 'toggler', '$state', 'ModalSrv'
+  (ref, $firebaseArray, toggler, $state, ModalSrv)->
+    ModalSrv.goBackTo = undefined
     ctrl = @
     ctrl.loading = true
-    ref = new Firebase firebase_url
 
     $firebaseArray(ref.child('guests')).$loaded()
       .then (guests)->
@@ -211,5 +226,57 @@ angular.module 'app', ['ui.router','app.routes', 'duScroll', 'ui.bootstrap', 'ng
     return
 ]
 
+.factory 'fbRef', [
+  'FIREBASE_URL'
+  (url)->
+    new Firebase url
+]
 
+.factory "User", [
+  'fbRef', '$stateParams', '$firebaseObject'
+  (ref, $stateParams, $firebaseObject)->
+
+    find: (uid, fn, fnCatch)->
+      $firebaseObject(ref.child("users/#{uid}")).$loaded()
+        .then fn
+        .catch fnCatch
+]
+
+.controller "GuestDetailCtrl", [
+  'User', '$stateParams', 'ModalSrv'
+  (User, $stateParams, ModalSrv)->
+    ModalSrv.goBackTo = 'guests'
+    ctrl = @
+    ctrl.loading = true
+
+    User.find $stateParams.uid,
+      (user)=>
+        ctrl.loading = false
+        ctrl.user = user
+      (err)=>
+        ctrl.loading = false
+        console.log err
+        ctrl.error = err
+
+    ctrl
+]
+
+.controller "MemberDetailCtrl", [
+  'User', '$stateParams', 'ModalSrv'
+  (User, $stateParams, ModalSrv)->
+    ModalSrv.goBackTo = 'members'
+    ctrl = @
+    ctrl.loading = true
+
+    User.find $stateParams.uid,
+      (user)=>
+        ctrl.loading = false
+        ctrl.user = user
+      (err)=>
+        ctrl.loading = false
+        console.log err
+        ctrl.error = err
+
+    ctrl
+]
 

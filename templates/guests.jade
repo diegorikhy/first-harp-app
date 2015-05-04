@@ -1,14 +1,13 @@
 .guests-page(class="container-fluid")
   div(ng-if="ctrl.loading")
     i.fa(class="fa-circle-o-notch fa-spin")
-    |  Carregando a Visitantes...
+    |  Carregando a lista de Visitantes...
 
   .row(ng-hide="ctrl.loading" )
     h2 Visitantes
     hr.star-primary
 
-    div.erro(ng-if="ctrl.erro")
-      {{ctrl.erro}}
+    div.erro(ng-if="ctrl.erro") {{ctrl.erro}}
 
     table.table(class="text-left")
       tbody
@@ -16,8 +15,10 @@
           td.actions
             i.fa(class="fa-check-circle-o" ng-click="ctrl.accept(guest)" title="Aceitar")
             i.fa(class="fa-ban"            ng-click="ctrl.ban(guest)"    title="Banir")
-          td.hidden-xs {{guest.name}}
-          td.visible-xs {{guest.name | firstName}}
+          td.hidden-xs
+            a(ui-sref="guest_detail({uid: guest.$id})") {{guest.name}}
+          td.visible-xs
+            a(ui-sref="guest_detail({uid: guest.$id})") {{guest.name | firstName}}
 
     div#banneds(ng-if="ctrl.banned.exists")
       i.fa( class="{{ctrl.banned.class}} {{!ctrl.banned.visible && 'banned'}}"

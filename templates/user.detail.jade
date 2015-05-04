@@ -1,0 +1,13 @@
+.user-detail-page(class="container-fluid")
+  div(ng-if="ctrl.loading")
+    i.fa(class="fa-circle-o-notch fa-spin")
+    |  Carregando dados do Usuário...
+
+  .row(ng-hide="ctrl.loading" )
+    h2 Detalhes
+    hr.star-primary
+
+    div.erro(ng-if="ctrl.erro") {{ctrl.erro}}
+
+    div.resume
+      pre {{ctrl|json}}

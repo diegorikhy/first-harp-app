@@ -89,6 +89,9 @@ footer.text-center
 //- Modal
 .modal(class="portfolio-modal" ng-class="{'show-modal': vm.modal.active}")
   .modal-content
+    .url-back-modal(ui-sref="{{vm.modal.goBackTo}}" ng-if="vm.modal.goBackTo")
+      i.fa(class="fa-chevron-left")
+
     .close-modal(ui-sref="home")
       i.fa(class="fa-times")
     .container

@@ -16,9 +16,20 @@ angular.module 'app.routes', ['ui.router']
         templateUrl: "./templates/members.html"
         controller: "MembersCtrl as ctrl"
 
+      .state 'member_detail',
+        url: '/members/:uid'
+        templateUrl: "./templates/user.detail.html"
+        controller: "MemberDetailCtrl as ctrl"
+
+
       .state 'guests',
         url: '/guests'
         templateUrl: "./templates/guests.html"
         controller: "GuestsCtrl as ctrl"
+
+      .state 'guest_detail',
+        url: '/guests/:uid'
+        templateUrl: "./templates/guest.detail.html"
+        controller: "GuestDetailCtrl as ctrl"
 
 ]

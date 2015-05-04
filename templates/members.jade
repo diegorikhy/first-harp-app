@@ -1,10 +1,19 @@
-div(class="container-fluid")
-  div(class="row")
+.members-page(class="container-fluid")
+  div(ng-if="ctrl.loading")
+    i.fa(class="fa-circle-o-notch fa-spin")
+    |  Carregando a lista de Membros...
+
+  .row(ng-hide="ctrl.loading" )
     h2 Membros
-    hr(class="star-primary")
-    table(class="table text-left")
+    hr.star-primary
+
+    div.erro(ng-if="ctrl.erro") {{ctrl.erro}}
+
+    table.table(class="text-left")
       tbody
-        tr(class="text-large" ng-repeat="member in ctrl.members")
-          td <strong>{{member.nick}}</strong>
-          td(class="hidden-xs") {{member.name}}
-          td {{member.role}}
+        tr.text-large(ng-repeat="member in ctrl.members")
+          td.hidden-xs
+            a(ui-sref="member_detail({uid: member.$id})") {{member.since}}
+          td.visible-xs
+            a(ui-sref="member_detail({uid: member.$id})") {{member.since | firstName}}
+

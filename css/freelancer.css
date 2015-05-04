@@ -438,6 +438,14 @@ footer .footer-below {
     margin: 30px 0;
 }
 
+.portfolio-modal .url-back-modal{
+    position: absolute;
+    top: 25px;
+    left: 25px;
+    background-color: transparent;
+    cursor: pointer;
+}
+
 .portfolio-modal .close-modal {
     position: absolute;
     top: 25px;
@@ -446,13 +454,11 @@ footer .footer-below {
     cursor: pointer;
 }
 
-.portfolio-modal .close-modal i.fa {
-  font-size: 3em;
-}
+.portfolio-modal .url-back-modal i.fa { font-size: 3em; }
+.portfolio-modal .close-modal i.fa    { font-size: 3em; }
 
-.portfolio-modal .close-modal:hover {
-    opacity: .3;
-}
+.portfolio-modal .url-back-modal:hover {  opacity: .3; }
+.portfolio-modal .close-modal:hover    {  opacity: .3; }
 
 .portfolio-modal .modal-backdrop {
     display: none;
