@@ -16,7 +16,7 @@ nav.navbar(class="navbar-default navbar-fixed-top")
       ul.nav(class="navbar-nav navbar-right")
         li.hidden
 
-        li.ng-cloak(ng-show="vm.loginSrv.session" du-scrollspy="options" ng-cloak="")
+        li.ng-cloak(ng-show="vm.loginSrv.isMember" du-scrollspy="options" ng-cloak="")
           a(href="#options" du-smooth-scroll ng-click="vm.menu.close()") Opções
 
         li(du-scrollspy="about")
@@ -39,7 +39,8 @@ header
           span.skills Matar, roubar e destruir
 
 //- Options Grid Section
-section#options.ng-cloak(ng-include="'./templates/options.html'" ng-if="vm.loginSrv.me" ng-cloak="")
+section#options.ng-cloak(ng-include="'./templates/options.html'" ng-if="vm.loginSrv.isMember" ng-cloak="")
+
 
 //- About Section -->
 section#about.success

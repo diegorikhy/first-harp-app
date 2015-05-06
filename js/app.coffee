@@ -23,19 +23,19 @@ angular.module 'app', ['ui.router','app.routes', 'duScroll', 'ui.bootstrap', 'ng
 ]
 
 .factory "toggler", ->
-    class
-      constructor: (attrs, @onOpen=angular.noop, @onClose=angular.noop)->
-        angular.extend @, attrs
-        @attrName = 'open' unless 'attrName' of attrs
-        @[@attrName] = true unless @attrName of attrs
-      toggle: ->
-        if @[@attrName] then @open() else @close()
-      close: ->
-        @[@attrName] = true
-        @onClose(arguments...)
-      open: ->
-        @[@attrName] = false
-        @onOpen(arguments...)
+  class
+    constructor: (attrs, @onOpen=angular.noop, @onClose=angular.noop)->
+      angular.extend @, attrs
+      @attrName = 'open' unless 'attrName' of attrs
+      @[@attrName] = true unless @attrName of attrs
+    toggle: ->
+      if @[@attrName] then @open() else @close()
+    close: ->
+      @[@attrName] = true
+      @onClose(arguments...)
+    open: ->
+      @[@attrName] = false
+      @onOpen(arguments...)
 
 .factory "ModalSrv", [
   'toggler',
@@ -48,22 +48,22 @@ angular.module 'app', ['ui.router','app.routes', 'duScroll', 'ui.bootstrap', 'ng
 .factory "Menu",     [ 'toggler', (tg)-> new tg(attrName: 'collapse') ]
 
 .factory "socialExtractor", ->
-    extractors =
-      facebook: (data)->
-        obj = {}
-        obj.provider          = data.provider
-        obj.name              = data.facebook.displayName
-        obj.email             = data.facebook.email if data.facebook.email
+  extractors =
+    facebook: (data)->
+      obj = {}
+      obj.provider          = data.provider
+      obj.name              = data.facebook.displayName
+      obj.email             = data.facebook.email if data.facebook.email
 
-        if profile = data.facebook.cachedUserProfile
-          obj.gender       = profile.gender
-          obj.locale       = profile.locale
-          obj.profile_url  = profile.link
-          obj.picture_url  = profile.picture.data.url if profile.picture?.data?.url?
+      if profile = data.facebook.cachedUserProfile
+        obj.gender       = profile.gender
+        obj.locale       = profile.locale
+        obj.profile_url  = profile.link
+        obj.picture_url  = profile.picture.data.url if profile.picture?.data?.url?
 
-        obj
+      obj
 
-    (data)-> extractors[data.provider](data)
+  (data)-> extractors[data.provider](data)
 
 .factory "loginSrv", [
   'fbRef', '$firebaseAuth', '$firebaseObject', 'socialExtractor'
@@ -74,6 +74,7 @@ angular.module 'app', ['ui.router','app.routes', 'duScroll', 'ui.bootstrap', 'ng
       logout: ->
         @me.$destroy()
         @me = undefined
+        @checkData()
         @auth.$unauth()
 
       login: (provider='facebook')->
@@ -83,14 +84,24 @@ angular.module 'app', ['ui.router','app.routes', 'duScroll', 'ui.bootstrap', 'ng
         $firebaseObject(ref.child("users/#{data.uid}")).$loaded()
           .then (user)=>
             @me = user
-            @me.$watch => @logout() unless @me.role
+            @checkData()
+
+            @me.$watch =>
+              @checkData()
+              unless @me.role
+                @logout()
 
             unless @me.role
               angular.extend @me, socialExtractor(data)
               @me.role = 'guest'
               @me.admin = false
               @me.$save().then =>
-                ref.child("guests/#{@me.$id}").set({banned:false, name: @me.name})
+                ref.child("guests/#{@me.$id}").set(true)
+
+      checkData: ->
+        @isMember = (@me?.role == 'member')
+        @isAdmin = @me?.admin
+
 
     service.auth.$onAuth (authData)->
       if authData
@@ -135,14 +146,14 @@ angular.module 'app', ['ui.router','app.routes', 'duScroll', 'ui.bootstrap', 'ng
 ]
 
 .controller "MembersCtrl", [
-  'fbRef', '$firebaseArray', '$state', 'ModalSrv',
-  (ref, $firebaseArray, $state, ModalSrv)->
+  'fbRef', '$firebaseArray', '$state', 'ModalSrv', 'loginSrv','User'
+  (ref, $firebaseArray, $state, ModalSrv, loginSrv, User)->
     ModalSrv.goBackTo = undefined
 
     ctrl = @
     ctrl.loading = true
 
-    $firebaseArray(ref.child('members')).$loaded()
+    $firebaseArray(ref.child('users').orderByChild('role').equalTo('member')).$loaded()
       .then (members)->
         ctrl.loading = false
         ctrl.members = members
@@ -154,25 +165,29 @@ angular.module 'app', ['ui.router','app.routes', 'duScroll', 'ui.bootstrap', 'ng
         else
           $state.go 'home'
 
+    ctrl.toggleAdmin = (member)->
+      return unless loginSrv.isAdmin
+      return if (loginSrv.me.$id == member.$id) && !confirm('Você não poderá mais gerenciar o clan. Tem certeza?')
+      User.admin.toggle(member)
+
+
+    ctrl.ban = (member)->
+      User.ban(member)
+
     return
 ]
 
 .controller "GuestsCtrl", [
-  'fbRef', '$firebaseArray', 'toggler', '$state', 'ModalSrv'
-  (ref, $firebaseArray, toggler, $state, ModalSrv)->
+  'fbRef', '$firebaseArray', 'toggler', '$state', 'ModalSrv', 'User'
+  (ref, $firebaseArray, toggler, $state, ModalSrv, User)->
     ModalSrv.goBackTo = undefined
     ctrl = @
     ctrl.loading = true
 
-    $firebaseArray(ref.child('guests')).$loaded()
-      .then (guests)->
+    $firebaseArray(ref.child('users').orderByChild('role').equalTo('guest')).$loaded()
+      .then (coll)->
         ctrl.loading = false
-        ctrl.guests = guests
-        ctrl.banned.check()
-
-        ctrl.guests.$watch ->
-          ctrl.banned.check()
-
+        ctrl.guests = coll
       .catch (err)->
         ctrl.loading = false
         if err.code == 'PERMISSION_DENIED'
@@ -184,44 +199,28 @@ angular.module 'app', ['ui.router','app.routes', 'duScroll', 'ui.bootstrap', 'ng
       attrName: 'visible'
       class: 'fa-eye-slash'
       visible: false
-      exists: false
-      check: ->
-        @exists = (ctrl.guests.filter((e)-> JSON.parse(e.banned)).length > 0)
-      -> @class = 'fa-eye-slash'
-      -> @class = 'fa-eye'
+      ->
+        @class = 'fa-eye-slash'
+      ->
+        unless @lista
+          @loading = true
+          $firebaseArray(ref.child('users').orderByChild('role').equalTo('banned')).$loaded()
+            .then (coll)=>
+              @loading = false
+              @lista = coll
+            .catch (err)=>
+              @loading = false
+
+        @class = 'fa-eye'
 
     ctrl.ban = (guest)->
-      guest.banned = true
-      ctrl.banned.check()
-      ctrl.guests.$save(guest)
+      User.ban(guest)
 
     ctrl.unban = (guest)->
-      guest.banned = false
-      ctrl.banned.check()
-      ctrl.guests.$save(guest)
+      User.unban(guest)
 
     ctrl.accept = (guest)->
-      memory =
-        uid: guest.$id
-        name: guest.name
-        banned: guest.banned
-
-      ctrl.guests.$remove(guest).then ->
-        ref.child("guests/#{memory.uid}").remove (err)->
-          unless err?
-            ref.child("members/#{memory.uid}").set
-              since: Firebase.ServerValue.TIMESTAMP
-              (err)->
-                unless err?
-                  ref.child("users/#{memory.uid}/role").set("member")
-                else
-                  console.log 'Member was not created', err
-                  # rollback recreate guest
-                  ref.child("guests/#{memory.uid}").set
-                    name: memory.name
-                    banned: memory.banned
-          else
-            console.log 'Guest was not destroyed', err
+      User.became_member(guest)
 
     return
 ]
@@ -233,8 +232,56 @@ angular.module 'app', ['ui.router','app.routes', 'duScroll', 'ui.bootstrap', 'ng
 ]
 
 .factory "User", [
-  'fbRef', '$stateParams', '$firebaseObject'
-  (ref, $stateParams, $firebaseObject)->
+  'fbRef', '$firebaseObject', 'loginSrv'
+  (ref, $firebaseObject, loginSrv)->
+
+    admin:
+      toggle: (member)->
+        return unless loginSrv.isAdmin
+        if member.admin
+          @revoke(member)
+        else
+          @grant(member)
+
+      grant: (member)->
+        return unless loginSrv.isAdmin
+        uid = member.$id
+        ref.child("users/#{uid}/admin").set true
+        ref.child("admins/#{uid}").set true
+
+      revoke: (member)->
+        return unless loginSrv.isAdmin
+        uid = member.$id
+        ref.child("users/#{uid}/admin").set false
+        ref.child("admins/#{uid}").remove()
+
+    unban: (member)->
+      return unless loginSrv.isAdmin
+      uid = member.$id
+      ref.child("users/#{uid}/role").set 'guest'
+
+    ban: (member)->
+      return unless loginSrv.isAdmin
+      uid = member.$id
+      ref.child("members/#{uid}").remove()
+      ref.child("guests/#{uid}").set true
+      ref.child("users/#{uid}/role").set 'banned'
+      @admin.revoke(member)
+
+    became_guest: (member)->
+      return unless loginSrv.isAdmin
+      uid = member.$id
+      ref.child("members/#{uid}").remove()
+      ref.child("guests/#{uid}").set true
+      ref.child("users/#{uid}/role").set 'guest'
+      @admin.revoke(member)
+
+    became_member: (member)->
+      return unless loginSrv.isAdmin
+      uid = member.$id
+      ref.child("guests/#{uid}").remove()
+      ref.child("members/#{uid}").set true
+      ref.child("users/#{uid}/role").set 'member'
 
     find: (uid, fn, fnCatch)->
       $firebaseObject(ref.child("users/#{uid}")).$loaded()
@@ -242,10 +289,10 @@ angular.module 'app', ['ui.router','app.routes', 'duScroll', 'ui.bootstrap', 'ng
         .catch fnCatch
 ]
 
-.controller "GuestDetailCtrl", [
-  'User', '$stateParams', 'ModalSrv'
-  (User, $stateParams, ModalSrv)->
-    ModalSrv.goBackTo = 'guests'
+.controller "UserDetailCtrl", [
+  'User', '$stateParams', 'ModalSrv', 'backToState'
+  (User, $stateParams, ModalSrv, backToState)->
+    ModalSrv.goBackTo = backToState
     ctrl = @
     ctrl.loading = true
 
@@ -255,28 +302,7 @@ angular.module 'app', ['ui.router','app.routes', 'duScroll', 'ui.bootstrap', 'ng
         ctrl.user = user
       (err)=>
         ctrl.loading = false
-        console.log err
         ctrl.error = err
 
     ctrl
 ]
-
-.controller "MemberDetailCtrl", [
-  'User', '$stateParams', 'ModalSrv'
-  (User, $stateParams, ModalSrv)->
-    ModalSrv.goBackTo = 'members'
-    ctrl = @
-    ctrl.loading = true
-
-    User.find $stateParams.uid,
-      (user)=>
-        ctrl.loading = false
-        ctrl.user = user
-      (err)=>
-        ctrl.loading = false
-        console.log err
-        ctrl.error = err
-
-    ctrl
-]
-

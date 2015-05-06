@@ -12,8 +12,13 @@
     table.table(class="text-left")
       tbody
         tr.text-large(ng-repeat="member in ctrl.members")
+          td.actions(ng-if="vm.loginSrv.isAdmin")
+            i.fa(class="fa-ban" ng-click="ctrl.ban(member)"         title="Banir")
+            i.fa(class="fa-user" ng-class="{'ordinary': !member.admin}" ng-click="ctrl.toggleAdmin(member)" title="{{member.admin ? 'Revogar Admin' : 'Tornar admin'}}")
+          td.actions(ng-if="!vm.loginSrv.isAdmin")
+            i.fa(class="fa-user" ng-class="{'ordinary': !member.admin}" title="{{member.admin ? 'Admin' : 'Membro normal'}}")
           td.hidden-xs
-            a(ui-sref="member_detail({uid: member.$id})") {{member.since}}
+            a(ui-sref="members_detail({uid: member.$id})") {{member.name}}
           td.visible-xs
-            a(ui-sref="member_detail({uid: member.$id})") {{member.since | firstName}}
+            a(ui-sref="members_detail({uid: member.$id})") {{member.name | firstName}}
 
