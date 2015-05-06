@@ -4,10 +4,21 @@
     |  Carregando dados do Usuário...
 
   .row(ng-hide="ctrl.loading" )
-    h2 Detalhes
-    hr.star-primary
-
     div.erro(ng-if="ctrl.erro") {{ctrl.erro}}
 
-    div.resume
-      pre {{ctrl|json}}
+
+    img.img-circle(ng-src="{{ctrl.user.picture_url}}")
+    div.header-roles
+      span {{ctrl.user.role}}
+      span(ng-show="ctrl.user.admin") admin
+
+    hr
+
+    p {{ctrl.user.name}}
+
+    p {{ctrl.user.email}}
+
+    p
+      a(ng-href="{{ctrl.user.profile_url}}" target="_blank") {{ctrl.user.provider}}
+
+    hr
