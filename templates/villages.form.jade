@@ -1,0 +1,31 @@
+//- "name": "huggaf",
+//- "role": "co-leader",
+//- "cv_level": 8,
+//- "user": "facebook:8712371827302"
+
+
+form#village-form
+  .row(class="control-group")
+    .form-group(class="col-xs-12 floating-label-form-group controls")
+      label Nome
+      input.form-control(type="text" placeholder="Nome" required="" data-validation-required-message="Informe o nome da vila.")
+      p.help-block(class="text-danger")
+
+  .row(class="control-group")
+    .form-group(class="col-xs-12 floating-label-form-group controls")
+      label Patente
+      input.form-control(type="text" placeholder="Patente")
+      p.help-block(class="text-danger")
+
+  .row(class="control-group")
+    .form-group(class="col-xs-12 floating-label-form-group controls")
+      label Nível Centro de Vila
+      input.form-control(type="text" placeholder="Nível")
+      p.help-block(class="text-danger")
+
+  br
+  #success
+
+  .row
+    .form-group(class="col-xs-12")
+      button.btn(type="submit" class="btn-success btn-lg") Salvar

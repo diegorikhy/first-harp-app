@@ -430,7 +430,7 @@ footer .footer-below {
     font-size: 3em;
 }
 
-.portfolio-modal .modal-content img {
+.portfolio-modal .modal-content img.title {
     margin-bottom: 30px;
 }
 

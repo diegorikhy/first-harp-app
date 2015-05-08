@@ -18,11 +18,20 @@ angular.module 'app.routes', ['ui.router']
 
       .state 'members_detail',
         url: '/members/:uid'
-        templateUrl: "./templates/user.detail.html"
+        templateUrl: "./templates/members.detail.html"
         controller: "UserDetailCtrl as ctrl"
         resolve:
           backToState: ->
             'members'
+
+      # .state 'members_detail.new_village',
+      #   url: '/new_village'
+      #   templateUrl: "./templates/villages.form.html"
+      #   controller: "VillageFormCtrl as form"
+      #   resolve:
+      #     backToState: ->
+      #       'members'
+
 
       .state 'guests',
         url: '/guests'
@@ -31,10 +40,16 @@ angular.module 'app.routes', ['ui.router']
 
       .state 'guests_detail',
         url: '/guests/:uid'
-        templateUrl: "./templates/guest.detail.html"
+        templateUrl: "./templates/guests.detail.html"
         controller: "UserDetailCtrl as ctrl"
         resolve:
           backToState: ->
             'guests'
+
+      .state 'villages',
+        url: '/villages'
+        templateUrl: "./templates/villages.html"
+        controller: "VillagesCtrl as ctrl"
+
 
 ]

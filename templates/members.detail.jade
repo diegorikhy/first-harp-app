@@ -1,0 +1,23 @@
+include ./user.detail.jade
+
+#villages.row(ng-controller="VillagesCtrl as villagesCtrl")
+  div(ng-if="villagesCtrl.loading")
+    i.fa(class="fa-circle-o-notch fa-spin")
+    |  Carregando vilas...
+
+  .row(ng-hide="villagesCtrl.loading" )
+    h2 Vilas
+
+    div.erro(ng-if="villagesCtrl.erro") {{villagesCtrl.erro}}
+
+    table.table(class="text-left")
+      tbody
+        tr.text-large(ng-repeat="village in villagesCtrl.villages" class="middle")
+          td {{village.name}}
+          td {{village.role}}
+          td
+            img.townhall(ng-src="img/town-hall/th{{village.cv_level}}.png")
+
+
+
+

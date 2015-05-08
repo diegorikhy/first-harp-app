@@ -306,3 +306,38 @@ angular.module 'app', ['ui.router','app.routes', 'duScroll', 'ui.bootstrap', 'ng
 
     ctrl
 ]
+
+.controller "VillageFormCtrl", [
+  '$stateParams'
+  ($stateParams)->
+    form = @
+    form.data = {}
+    form.submit = ->
+      console.log "Saving"
+    form
+]
+
+.controller "VillagesCtrl", [
+  '$stateParams', 'fbRef', '$firebaseArray'
+  ($stateParams, ref, $firebaseArray)->
+    ctrl = @
+    ctrl.loading = true
+
+    refVillages = ref.child('villages')
+    refVillages = refVillages.orderByChild('user').equalTo($stateParams.uid) if $stateParams.uid
+
+    $firebaseArray(refVillages).$loaded()
+      .then (villages)->
+        ctrl.loading = false
+        ctrl.villages = villages
+
+      .catch (err)->
+        ctrl.loading = false
+        ctrl.villages = []
+        if err.code == 'PERMISSION_DENIED'
+          ctrl.erro = "Desculpe, mas você não tem permissão para acessar esta lista"
+        else
+          $state.go 'home'
+
+    ctrl
+]
