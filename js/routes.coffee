@@ -51,5 +51,10 @@ angular.module 'app.routes', ['ui.router']
         templateUrl: "./templates/villages.html"
         controller: "VillagesCtrl as ctrl"
 
+      .state 'edit_village',
+        url: '/villages/:uid/edit'
+        templateUrl: "./templates/villages.form.html"
+        controller: "VillagesCtrl as ctrl"
+
 
 ]
